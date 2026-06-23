@@ -1,1 +1,146 @@
-"Hello World" 
+
+# Python Decorator (but explained like you're slightly confused 😄)
+
+---
+
+## Dependencies
+
+- python
+- AOP
+- Functions are first-class citizens
+- Closure (yes… that thing)
+- `*args`, `**kwargs` <----- which idk yet
+
+
+## 👀 How it looks like (the "what is this magic" moment)
+
+```python
+def decorator_method(func):
+    print("Hey there")
+    return func  # ⚠️ more on this later
+
+@decorator_method
+def hello_world():
+    print("hello_world")
+```
+
+### 🧠 What just happened?
+Python actually does this:
+
+```python
+hello_world = decorator_method(hello_world)
+```
+
+## Still with me?
+
+Alright, let's make it slightly more cursed:
+
+```python
+def decorator_method():
+    print("Hey there")
+
+    def why_we_have_it(func):
+        print("I guess, hello?")
+        return func  # ⚠️ still suspicious...
+
+    return why_we_have_it
+
+@decorator_method()  # 👈 NOW we have ()
+def hello_world():
+    print("hello_world")
+```
+
+### 🧠 Translation time again
+
+```python
+hello_world = decorator_method()(hello_world)
+```
+
+#### Break it down:
+
+1. decorator_method() → returns why_we_have_it
+2. why_we_have_it(hello_world) → returns something
+
+## 🧨 Let's overcomplicate it (because why not)
+
+```python
+#                             What?      Wha????
+#                                |        |
+#                                v        v
+def decorator_method(greeting, *args, **kwargs):
+    print(f"Hey {greeting}")
+
+    def why_we_have_it(func):
+        print("I guess, hello?")
+        return func
+
+    return why_we_have_it
+
+@decorator_method("there")
+def hello_world():
+    print("hello_world")
+
+```
+
+### 🤯 Wait… function has ONE param now???
+Yes.
+👉 Only because you're calling the outer function first.
+
+Equivalent to:
+
+```python
+
+temp = decorator_method("there")
+hello_world = temp(hello_world)
+
+```
+
+---
+
+## ❓ What even is a decorator?
+
+> A decorator is just a function that takes a function and returns another function.
+
+*More formally:*
+
+- It is a higher-order function
+- It wraps or replaces another function
+- It runs at definition time, not runtime of your function call
+
+### 🎁 Mental Model (gift edition)
+
+- func = your gift 🎁
+- decorator = gift factory 🏭
+- wrapper = gift box 🎁📦
+
+👉 Important:
+
+> The decorator does NOT return the original gift,
+> 
+> It usually returns a wrapped gift
+
+## 💡 The REAL pattern (you will use this 99% of the time)
+
+```python
+
+def decorator(func):
+    def wrapper(*args, **kwargs):
+        # before
+        result = func(*args, **kwargs)
+        # after
+        return result
+    return wrapper
+
+```
+---
+Section for myself
+
+## ⚠️ Big misunderstanding (let’s fix it)
+
+### ❌ "Decorator must return func"
+Nope.
+
+### ✅ Correct version:
+
+> A decorator must return a callable
+> 
